@@ -1,16 +1,22 @@
 {
   "manifest_version": 3,
-  "name": "Haptic AI Project",
-  "version": "1.7",
-  "permissions": ["activeTab", "scripting"],
+  "name": "Haptic AI Fabric Detector",
+  "version": "1.0",
+  "permissions": ["bluetooth", "storage"],
   "content_scripts": [
     {
-      "matches": ["https://*.trendyol.com/*", "https://*.amazon.com.tr/*", "https://*.google.com/*"],
-      "js": ["content.js"], 
-      "css": ["style.css"]
+      "matches": [
+        "*://*.trendyol.com/*",
+        "*://*.hepsiburada.com/*",
+        "*://*.n11.com/*",
+        "*://*.amazon.com.tr/*",
+        "*://*.amazon.com/*",
+        "*://*.temu.com/*"
+      ],
+      "js": ["content.js"]
     }
   ],
-  "background": {
-    "service_worker": "background.js"
-  }
+  "host_permissions": [
+    "https://haptic-project-ai.onrender.com/*"
+  ]
 }
