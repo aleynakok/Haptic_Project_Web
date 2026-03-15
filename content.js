@@ -79,29 +79,48 @@ function getProductMetadata() {
 
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
-    status.innerHTML = "Analiz ediliyor...";
+    status.innerHTML = "⏳ Analiz ediliyor...";
 
     const finalText = getProductMetadata();
-    console.log("AI'ya Giden Metin:", finalText);
+    console.log("AI'ya gönderilen veri:", finalText);
 
     try {
+        // Zaman aşımı kontrolü (Sunucu 30 sn içinde cevap vermezse iptal et)
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 30000);
+
         const response = await fetch(CLOUD_AI_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: finalText })
+            body: JSON.stringify({ text: finalText }),
+            signal: controller.signal
         });
-        
+
+        clearTimeout(timeoutId);
+
+        if (!response.ok) {
+            throw new Error(`Sunucu hatası: ${response.status}`);
+        }
+
         const data = await response.json();
-        status.innerHTML = `Karar: <b style="color:#e91e63">${data.fabric.toUpperCase()}</b> <br> <small>Güven: ${data.confidence}</small>`;
+        console.log("Sunucudan gelen cevap:", data);
+
+        status.innerHTML = `Karar: <b style="color:#e91e63">${data.fabric.toUpperCase()}</b><br><small>Güven: ${data.confidence}</small>`;
         
+        // ESP32'ye komut gönder
         const activeChar = await getActiveCharacteristic();
         if (activeChar) {
             const encoder = new TextEncoder();
             await activeChar.writeValue(encoder.encode(data.command));
         }
+
     } catch (err) {
-        console.error("AI Analiz Hatası:", err);
-        status.innerHTML = "<b style='color:red'>Bağlantı Hatası!</b>";
+        console.error("HATA DETAYI:", err);
+        if (err.name === 'AbortError') {
+            status.innerHTML = "<b style='color:orange'>Sunucu çok geç yanıt verdi (Uyuyor olabilir). Tekrar deneyin.</b>";
+        } else {
+            status.innerHTML = "<b style='color:red'>Bağlantı Hatası!</b>";
+        }
     }
 }
 
