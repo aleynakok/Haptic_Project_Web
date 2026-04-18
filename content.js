@@ -1,4 +1,4 @@
-// content.js - Haptik AI Projesi (Mute Özelliği Eklenmiş Sürüm)
+// content.js - Haptik AI Projesi (Otomatik Yeniden Bağlanma Sürümü)
 
 const DEVICE_NAME = "Haptic_Fabric_ESP32";
 const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
@@ -7,7 +7,7 @@ const CLOUD_AI_URL = "https://haptic-project-ai.onrender.com/predict";
 
 let characteristic = null;
 let bluetoothDevice = null;
-let isMuted = false; // Mute durumunu tutan değişken
+let isMuted = false;
 
 // 1. Bluetooth Bağlantı Yönetimi
 async function getActiveCharacteristic() {
@@ -17,28 +17,70 @@ async function getActiveCharacteristic() {
     return null;
 }
 
+// Yeni Sayfada Mevcut Cihazı Kontrol Et ve Bağlan
+async function checkAutoConnect() {
+    const status = document.getElementById('haptic-status');
+    try {
+        // Tarayıcının daha önce izin verilen cihazlar listesini al
+        const devices = await navigator.bluetooth.getDevices();
+        const existingDevice = devices.find(d => d.name === DEVICE_NAME);
+
+        if (existingDevice) {
+            console.log("Eski bağlantı bulundu, otomatik bağlanılıyor...");
+            status.innerText = "Otomatik bağlanılıyor...";
+            await setupGATT(existingDevice);
+        }
+    } catch (e) {
+        console.log("Otomatik bağlantı yapılamadı:", e);
+    }
+}
+
+// GATT Sunucusuna Bağlanma ve Karakteristik Alma (Ortak Fonksiyon)
+async function setupGATT(device) {
+    const status = document.getElementById('haptic-status');
+    const connBtn = document.getElementById('haptic-conn-btn');
+    
+    bluetoothDevice = device;
+    
+    // Bağlantı koptuğunda haber ver
+    bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
+
+    const server = await bluetoothDevice.gatt.connect();
+    const service = await server.getPrimaryService(SERVICE_UUID);
+    characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
+
+    status.innerHTML = "<b style='color:green'>Sistem Bağlandı ✅</b>";
+    if (connBtn) {
+        connBtn.style.background = "#34a853";
+        connBtn.innerText = "✅ Bağlı";
+    }
+}
+
+function onDisconnected() {
+    const status = document.getElementById('haptic-status');
+    const connBtn = document.getElementById('haptic-conn-btn');
+    status.innerHTML = "<b style='color:red'>Bağlantı Kesildi!</b>";
+    if (connBtn) {
+        connBtn.style.background = "#1a73e8";
+        connBtn.innerText = "🔗 Bağlantıyı Başlat";
+    }
+}
+
 async function connectToESP32() {
     const status = document.getElementById('haptic-status');
     try {
         status.innerText = "Cihaz aranıyor...";
-        bluetoothDevice = await navigator.bluetooth.requestDevice({
+        const device = await navigator.bluetooth.requestDevice({
             filters: [{ name: DEVICE_NAME }],
             optionalServices: [SERVICE_UUID]
         });
 
-        const server = await bluetoothDevice.gatt.connect();
-        const service = await server.getPrimaryService(SERVICE_UUID);
-        characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
-
-        status.innerHTML = "<b style='color:green'>Sistem Bağlandı ✅</b>";
-        document.getElementById('haptic-conn-btn').style.background = "#34a853";
-        document.getElementById('haptic-conn-btn').innerText = "✅ Bağlı";
+        await setupGATT(device);
     } catch (e) {
         status.innerText = "Hata: " + e.message;
     }
 }
 
-// Mute/Unmute Fonksiyonu
 async function toggleMute() {
     isMuted = document.getElementById('haptic-mute-switch').checked;
     const status = document.getElementById('haptic-status');
@@ -47,18 +89,15 @@ async function toggleMute() {
     if (activeChar) {
         try {
             const encoder = new TextEncoder();
-            const cmd = isMuted ? "0" : "u"; // Mute ise 0, değilse u (unmute)
+            const cmd = isMuted ? "0" : "u";
             await activeChar.writeValue(encoder.encode(cmd));
             status.innerHTML = isMuted ? "<b style='color:#e91e63'>Sistem Susturuldu (0)</b>" : "<b style='color:green'>Sistem Aktif (u)</b>";
         } catch (e) {
             console.error("Mute komutu gönderilemedi:", e);
         }
-    } else {
-        status.innerHTML = isMuted ? "<i>Mute Hazır (Cihaz Bağlı Değil)</i>" : "Sistem Hazır";
     }
 }
 
-// 2. Sayfadan Akıllı Metin Çıkarma
 function getProductMetadata() {
     const titleSelectors = [".pr-new-br", ".product-name", "h1", "#productTitle", ".pro-title-container h1", "[data-testid='product-title']", ".product-title"];
     let title = "Bilinmeyen Ürün";
@@ -86,44 +125,29 @@ function getProductMetadata() {
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
     status.innerHTML = "⏳ Analiz ediliyor...";
-
     const finalText = getProductMetadata();
 
     try {
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
-
         const response = await fetch(CLOUD_AI_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: finalText }),
-            signal: controller.signal
+            body: JSON.stringify({ text: finalText })
         });
-
-        clearTimeout(timeoutId);
-
-        if (!response.ok) throw new Error(`Sunucu hatası: ${response.status}`);
-
         const data = await response.json();
         status.innerHTML = `Karar: <b style="color:#e91e63">${data.fabric.toUpperCase()}</b><br><small>Güven: ${data.confidence}</small>`;
         
-        // MUTE KONTROLÜ: Eğer sessizde değilse AI komutunu gönder
         if (!isMuted) {
             const activeChar = await getActiveCharacteristic();
             if (activeChar) {
                 const encoder = new TextEncoder();
                 await activeChar.writeValue(encoder.encode(data.command));
             }
-        } else {
-            console.log("Muted: Komut gönderilmedi ->", data.command);
         }
-
     } catch (err) {
-        status.innerHTML = "<b style='color:red'>Bağlantı Hatası!</b>";
+        status.innerHTML = "<b style='color:red'>Hata!</b>";
     }
 }
 
-// 3. Widget Arayüzü
 function initWidget() {
     if (document.getElementById('haptic-widget')) return;
     
@@ -140,8 +164,6 @@ function initWidget() {
     
     widget.innerHTML = `
         <div style="font-weight:bold; color:#1a73e8; border-bottom:1px solid #eee; padding-bottom:5px; text-align:center;">Haptik AI 🖐️</div>
-        
-        <!-- Mute Switch -->
         <div style="display:flex; align-items:center; justify-content:space-between; background:#f0f7ff; padding:8px; border-radius:8px; border:1px solid #d0e3ff;">
             <span style="font-size:12px; font-weight:bold; color:#444;">Haptik Mute</span>
             <label class="haptic-switch" style="position:relative; display:inline-block; width:34px; height:20px;">
@@ -149,7 +171,6 @@ function initWidget() {
                 <span class="haptic-slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px;"></span>
             </label>
         </div>
-
         <button id="haptic-conn-btn" style="width:100%; padding:8px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🔗 Bağlantıyı Başlat</button>
         <button id="haptic-detect-btn" style="width:100%; padding:10px; background:#34a853; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🔍 Kumaşı Hisset</button>
         <div id="haptic-status" style="font-size:11px; text-align:center; color:#555; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #eee; min-height:30px;">Sistem Hazır</div>
@@ -157,24 +178,21 @@ function initWidget() {
     
     document.body.appendChild(widget);
 
-    // Switch kaydırma efektini inline style yerine CSS'e bırakmak daha iyidir ama slider yuvarlağını manuel ekliyoruz:
     const slider = widget.querySelector('.haptic-slider');
     const knob = document.createElement('div');
-    knob.setAttribute('style', `
-        position: absolute; content: ""; height: 14px; width: 14px;
-        left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;
-    `);
+    knob.setAttribute('style', `position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;`);
     slider.appendChild(knob);
 
-    // Event Listeners
     document.getElementById('haptic-conn-btn').onclick = connectToESP32;
     document.getElementById('haptic-detect-btn').onclick = runAIAnalysis;
     document.getElementById('haptic-mute-switch').onchange = (e) => {
-        // Knob animasyonu
         knob.style.transform = e.target.checked ? "translateX(14px)" : "translateX(0)";
         slider.style.backgroundColor = e.target.checked ? "#e91e63" : "#ccc";
         toggleMute();
     };
+
+    // WIDGET OLUŞUNCA OTOMATİK BAĞLANTIYI KONTROL ET
+    checkAutoConnect();
 }
 
 if (document.readyState === "complete" || document.readyState === "interactive") {
