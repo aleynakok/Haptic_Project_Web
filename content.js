@@ -1,4 +1,4 @@
-// content.js - Haptik AI Projesi (Otomatik Yeniden Bağlanma Sürümü)
+// content.js - Haptik AI Projesi (Mute Durumu Hafızalı Sürüm)
 
 const DEVICE_NAME = "Haptic_Fabric_ESP32";
 const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
@@ -17,11 +17,10 @@ async function getActiveCharacteristic() {
     return null;
 }
 
-// Yeni Sayfada Mevcut Cihazı Kontrol Et ve Bağlan
+// Otomatik Bağlantı Kontrolü
 async function checkAutoConnect() {
     const status = document.getElementById('haptic-status');
     try {
-        // Tarayıcının daha önce izin verilen cihazlar listesini al
         const devices = await navigator.bluetooth.getDevices();
         const existingDevice = devices.find(d => d.name === DEVICE_NAME);
 
@@ -35,14 +34,11 @@ async function checkAutoConnect() {
     }
 }
 
-// GATT Sunucusuna Bağlanma ve Karakteristik Alma (Ortak Fonksiyon)
 async function setupGATT(device) {
     const status = document.getElementById('haptic-status');
     const connBtn = document.getElementById('haptic-conn-btn');
-    
     bluetoothDevice = device;
     
-    // Bağlantı koptuğunda haber ver
     bluetoothDevice.addEventListener('gattserverdisconnected', onDisconnected);
 
     const server = await bluetoothDevice.gatt.connect();
@@ -53,6 +49,11 @@ async function setupGATT(device) {
     if (connBtn) {
         connBtn.style.background = "#34a853";
         connBtn.innerText = "✅ Bağlı";
+    }
+
+    // BAĞLANINCA: Eğer o an Mute açıksa "0" göndererek cihazı sustur
+    if (isMuted) {
+        sendMuteCommand(true);
     }
 }
 
@@ -74,30 +75,67 @@ async function connectToESP32() {
             filters: [{ name: DEVICE_NAME }],
             optionalServices: [SERVICE_UUID]
         });
-
         await setupGATT(device);
     } catch (e) {
         status.innerText = "Hata: " + e.message;
     }
 }
 
-async function toggleMute() {
-    isMuted = document.getElementById('haptic-mute-switch').checked;
+// MUTE DURUMUNU KAYDET VE GÖNDER
+async function handleMuteToggle(checked) {
+    isMuted = checked;
     const status = document.getElementById('haptic-status');
-    const activeChar = await getActiveCharacteristic();
 
+    // 1. Durumu Chrome Hafızasına Kaydet
+    chrome.storage.local.set({ "haptic_mute_state": isMuted });
+
+    // 2. Cihaza Komut Gönder
+    await sendMuteCommand(isMuted);
+
+    status.innerHTML = isMuted ? "<b style='color:#e91e63'>Sistem Susturuldu (0)</b>" : "<b style='color:green'>Sistem Aktif (u)</b>";
+}
+
+async function sendMuteCommand(mute) {
+    const activeChar = await getActiveCharacteristic();
     if (activeChar) {
         try {
             const encoder = new TextEncoder();
-            const cmd = isMuted ? "0" : "u";
+            const cmd = mute ? "0" : "u";
             await activeChar.writeValue(encoder.encode(cmd));
-            status.innerHTML = isMuted ? "<b style='color:#e91e63'>Sistem Susturuldu (0)</b>" : "<b style='color:green'>Sistem Aktif (u)</b>";
         } catch (e) {
-            console.error("Mute komutu gönderilemedi:", e);
+            console.error("Mute komut hatası:", e);
         }
     }
 }
 
+async function runAIAnalysis() {
+    const status = document.getElementById('haptic-status');
+    status.innerHTML = "⏳ Analiz ediliyor...";
+    const finalText = getProductMetadata();
+
+    try {
+        const response = await fetch(CLOUD_AI_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text: finalText })
+        });
+        const data = await response.json();
+        status.innerHTML = `Karar: <b style="color:#e91e63">${data.fabric.toUpperCase()}</b><br><small>Güven: ${data.confidence}</small>`;
+        
+        // MUTE KONTROLÜ
+        if (!isMuted) {
+            const activeChar = await getActiveCharacteristic();
+            if (activeChar) {
+                const encoder = new TextEncoder();
+                await activeChar.writeValue(encoder.encode(data.command));
+            }
+        }
+    } catch (err) {
+        status.innerHTML = "<b style='color:red'>Hata!</b>";
+    }
+}
+
+// Ürün Meta Verisi Çıkarıcı
 function getProductMetadata() {
     const titleSelectors = [".pr-new-br", ".product-name", "h1", "#productTitle", ".pro-title-container h1", "[data-testid='product-title']", ".product-title"];
     let title = "Bilinmeyen Ürün";
@@ -122,32 +160,6 @@ function getProductMetadata() {
     return (title + " " + relevantText).toLowerCase().substring(0, 1000);
 }
 
-async function runAIAnalysis() {
-    const status = document.getElementById('haptic-status');
-    status.innerHTML = "⏳ Analiz ediliyor...";
-    const finalText = getProductMetadata();
-
-    try {
-        const response = await fetch(CLOUD_AI_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: finalText })
-        });
-        const data = await response.json();
-        status.innerHTML = `Karar: <b style="color:#e91e63">${data.fabric.toUpperCase()}</b><br><small>Güven: ${data.confidence}</small>`;
-        
-        if (!isMuted) {
-            const activeChar = await getActiveCharacteristic();
-            if (activeChar) {
-                const encoder = new TextEncoder();
-                await activeChar.writeValue(encoder.encode(data.command));
-            }
-        }
-    } catch (err) {
-        status.innerHTML = "<b style='color:red'>Hata!</b>";
-    }
-}
-
 function initWidget() {
     if (document.getElementById('haptic-widget')) return;
     
@@ -164,6 +176,7 @@ function initWidget() {
     
     widget.innerHTML = `
         <div style="font-weight:bold; color:#1a73e8; border-bottom:1px solid #eee; padding-bottom:5px; text-align:center;">Haptik AI 🖐️</div>
+        
         <div style="display:flex; align-items:center; justify-content:space-between; background:#f0f7ff; padding:8px; border-radius:8px; border:1px solid #d0e3ff;">
             <span style="font-size:12px; font-weight:bold; color:#444;">Haptik Mute</span>
             <label class="haptic-switch" style="position:relative; display:inline-block; width:34px; height:20px;">
@@ -171,6 +184,7 @@ function initWidget() {
                 <span class="haptic-slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px;"></span>
             </label>
         </div>
+
         <button id="haptic-conn-btn" style="width:100%; padding:8px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🔗 Bağlantıyı Başlat</button>
         <button id="haptic-detect-btn" style="width:100%; padding:10px; background:#34a853; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🔍 Kumaşı Hisset</button>
         <div id="haptic-status" style="font-size:11px; text-align:center; color:#555; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #eee; min-height:30px;">Sistem Hazır</div>
@@ -183,15 +197,28 @@ function initWidget() {
     knob.setAttribute('style', `position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;`);
     slider.appendChild(knob);
 
+    const muteCheckbox = document.getElementById('haptic-mute-switch');
+
+    // WIDGET AÇILINCA: Kayıtlı Mute durumunu yükle
+    chrome.storage.local.get("haptic_mute_state", (data) => {
+        if (data.haptic_mute_state !== undefined) {
+            isMuted = data.haptic_mute_state;
+            muteCheckbox.checked = isMuted;
+            // Görseli güncelle
+            knob.style.transform = isMuted ? "translateX(14px)" : "translateX(0)";
+            slider.style.backgroundColor = isMuted ? "#e91e63" : "#ccc";
+        }
+    });
+
     document.getElementById('haptic-conn-btn').onclick = connectToESP32;
     document.getElementById('haptic-detect-btn').onclick = runAIAnalysis;
-    document.getElementById('haptic-mute-switch').onchange = (e) => {
+    
+    muteCheckbox.onchange = (e) => {
         knob.style.transform = e.target.checked ? "translateX(14px)" : "translateX(0)";
         slider.style.backgroundColor = e.target.checked ? "#e91e63" : "#ccc";
-        toggleMute();
+        handleMuteToggle(e.target.checked);
     };
 
-    // WIDGET OLUŞUNCA OTOMATİK BAĞLANTIYI KONTROL ET
     checkAutoConnect();
 }
 
