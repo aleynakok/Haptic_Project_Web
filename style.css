@@ -104,7 +104,7 @@
 
 /* style.css içindeki bu kısmı güncelleyin */
 #haptic-status { 
-    font-size: 13px !important; /* 10px'den 13px'e çıkarıldı */
+    font-size: 12px !important; /* 10px'den 13px'e çıkarıldı */
     line-height: 1.4 !important; /* Satır aralığı eklendi */
     letter-spacing: 1.5px !important; 
     font-weight: 800 !important; 

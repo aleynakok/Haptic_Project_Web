@@ -113,28 +113,24 @@ async function sendMuteCommand(mute) {
     }
 }
 
-
-// content.js içindeki runAIAnalysis fonksiyonunu bununla güncelleyin
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
-    status.innerHTML = "ANALİZ EDİLİYOR...";
-    
-    const productText = getProductMetadata();
+    status.innerHTML = "Analiz ediliyor...";
+    const finalText = getProductMetadata();
 
     try {
         const response = await fetch(CLOUD_AI_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: productText })
+            body: JSON.stringify({ text: finalText })
         });
         const data = await response.json();
-        
-        // GÖRSELDEKİ FORMAT: Karar ve Güven alt alta, Karar rengi pembe/magenta
         status.innerHTML = `
             <div>KARAR: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
             <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px;">GÜVEN: %${(data.confidence * 100).toFixed(0)}</div>
         `;
         
+        // MUTE KONTROLÜ
         if (!isMuted) {
             const activeChar = await getActiveCharacteristic();
             if (activeChar) {
@@ -143,7 +139,7 @@ async function runAIAnalysis() {
             }
         }
     } catch (err) {
-        status.innerHTML = "<span style='color:#FF2E7E'>ANALİZ HATASI</span>";
+        status.innerHTML = "<b style='color:red'>Hata!</b>";
     }
 }
 
