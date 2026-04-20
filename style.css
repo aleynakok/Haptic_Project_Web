@@ -102,23 +102,25 @@
     box-shadow: 0 10px 25px rgba(0, 251, 255, 0.4) !important; 
 }
 
-#haptic-status-bar { 
-    text-align: center !important; 
-    background: rgba(0,0,0,0.6) !important; 
-    padding: 14px !important; 
-    border-radius: 16px !important; 
-    border: 1px solid rgba(0, 251, 255, 0.15) !important;
-    min-height: 48px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-}
-
+/* style.css içindeki ilgili kısmı bununla güncelle */
 #haptic-status { 
-    font-size: 12px !important; 
+    font-size: 10px !important; /* 12px'den 10px'e düşürüldü */
     letter-spacing: 2px !important; 
     font-weight: 800 !important; 
     text-transform: uppercase !important;
+    opacity: 0.9;
+}
+
+#haptic-status-bar { 
+    text-align: center !important; 
+    background: rgba(0,0,0,0.6) !important; 
+    padding: 12px !important; /* Biraz daha daraltıldı */
+    border-radius: 16px !important; 
+    border: 1px solid rgba(0, 251, 255, 0.15) !important;
+    min-height: 40px !important; /* Yükseklik dengelendi */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 /* Switch */

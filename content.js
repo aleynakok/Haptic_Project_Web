@@ -115,7 +115,7 @@ async function sendMuteCommand(mute) {
 
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
-    status.innerHTML = "⏳ Analiz ediliyor...";
+    status.innerHTML = "Analiz ediliyor...";
     const finalText = getProductMetadata();
 
     try {
@@ -175,7 +175,6 @@ function initWidget() {
         <div class="haptic-header">
             <div>
                 <span class="haptic-glitch-text">HAPTIC AI</span>
-                <span class="haptic-sub-title">CORE v2.0</span>
             </div>
             <div class="haptic-status-dot"></div>
         </div>
