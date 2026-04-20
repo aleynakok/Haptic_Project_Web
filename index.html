@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css"> <!-- CSS dosyasını buraya bağladık -->
+</head>
+<body>
+
+    <div id="haptic-widget">
+        <div class="haptic-header">
+            <div class="haptic-title-group">
+                <span class="haptic-glitch-text">HAPTIC AI</span>
+                <span class="haptic-sub-title">CORE INTERFACE v2.0</span>
+            </div>
+            <div class="haptic-status-dot"></div>
+        </div>
+
+        <div class="haptic-glass-card">
+            <span class="haptic-label">SİSTEMİ SUSTUR</span>
+            <label class="haptic-switch">
+                <input type="checkbox" id="haptic-mute-toggle">
+                <span class="haptic-slider"></span>
+            </label>
+        </div>
+
+        <div class="haptic-actions">
+            <button id="haptic-conn-btn" class="haptic-btn btn-blue">
+                <span>⚡</span> SİSTEMİ BAŞLAT
+            </button>
+            <button id="haptic-detect-btn" class="haptic-btn btn-cyan">
+                <span>🔍</span> KUMAŞI ANALİZ ET
+            </button>
+        </div>
+
+        <div id="haptic-status-bar">
+            <span id="haptic-status-text">SİSTEM HAZIR...</span>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript kodları buraya
+        const connBtn = document.getElementById('haptic-conn-btn');
+        const detectBtn = document.getElementById('haptic-detect-btn');
+        const statusText = document.getElementById('haptic-status-text');
+
+        connBtn.onclick = () => { statusText.innerText = "BAĞLANTI KURULUYOR..."; statusText.style.color = "#007BFF"; };
+        detectBtn.onclick = () => { statusText.innerText = "KUMAŞ ANALİZ EDİLİYOR..."; statusText.style.color = "#00FBFF"; };
+    </script>
+</body>
+</html>
