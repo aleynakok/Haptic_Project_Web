@@ -45,10 +45,10 @@ async function setupGATT(device) {
     const service = await server.getPrimaryService(SERVICE_UUID);
     characteristic = await service.getCharacteristic(CHARACTERISTIC_UUID);
 
-    status.innerHTML = "<b style='color:green'>Sistem Bağlandı ✅</b>";
+    status.innerHTML = "<b style='color:green'>Sistem Bağlandı</b>";
     if (connBtn) {
         connBtn.style.background = "#34a853";
-        connBtn.innerText = "✅ Bağlı";
+        connBtn.innerText = "Bağlı";
     }
 
     // BAĞLANINCA: Eğer o an Mute açıksa "0" göndererek cihazı sustur
