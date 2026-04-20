@@ -13,7 +13,8 @@
         "*://*.amazon.com/*",
         "*://*.temu.com/*"
       ],
-      "js": ["content.js"]
+      "js": ["content.js"],
+      "css": ["style.css"] 
     }
   ],
   "host_permissions": [

@@ -164,58 +164,56 @@ function initWidget() {
     if (document.getElementById('haptic-widget')) return;
     
     const widget = document.createElement('div');
-    widget.id = 'haptic-widget';
-    widget.setAttribute('style', `
-        position: fixed !important; bottom: 20px !important; right: 20px !important;
-        z-index: 2147483647 !important; background: white !important; padding: 15px !important;
-        border-radius: 12px !important; box-shadow: 0 4px 25px rgba(0,0,0,0.3) !important;
-        width: 200px !important; font-family: Arial, sans-serif !important;
-        border-top: 5px solid #1a73e8 !important; display: flex !important;
-        flex-direction: column !important; gap: 10px !important; color: #333 !important;
-    `);
-    
+    widget.id = 'haptic-widget'; // Tüm tasarım artık style.css'den gelecek
+
     widget.innerHTML = `
-        <div style="font-weight:bold; color:#1a73e8; border-bottom:1px solid #eee; padding-bottom:5px; text-align:center;">Haptik AI 🖐️</div>
-        
-        <div style="display:flex; align-items:center; justify-content:space-between; background:#f0f7ff; padding:8px; border-radius:8px; border:1px solid #d0e3ff;">
-            <span style="font-size:12px; font-weight:bold; color:#444;">Haptik Mute</span>
-            <label class="haptic-switch" style="position:relative; display:inline-block; width:34px; height:20px;">
-                <input type="checkbox" id="haptic-mute-switch" style="opacity:0; width:0; height:0;">
-                <span class="haptic-slider" style="position:absolute; cursor:pointer; top:0; left:0; right:0; bottom:0; background-color:#ccc; transition:.4s; border-radius:34px;"></span>
+        <div class="haptic-header">
+            <div class="haptic-title-group">
+                <span class="haptic-glitch-text">HAPTIC AI</span>
+                <span class="haptic-sub-title">INTERFACE v2.0</span>
+            </div>
+            <div class="haptic-status-dot pulse-cyan"></div>
+        </div>
+
+        <div class="haptic-glass-card">
+            <span class="haptic-label">HAPTIC MUTE</span>
+            <label class="haptic-switch">
+                <input type="checkbox" id="haptic-mute-switch">
+                <span class="haptic-slider"></span>
             </label>
         </div>
 
-        <button id="haptic-conn-btn" style="width:100%; padding:8px; background:#1a73e8; color:white; border:none; border-radius:6px; cursor:pointer; font-weight:bold;">🔗 Bağlantıyı Başlat</button>
-        <button id="haptic-detect-btn" style="width:100%; padding:10px; background:#34a853; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">🔍 Kumaşı Hisset</button>
-        <div id="haptic-status" style="font-size:11px; text-align:center; color:#555; background:#f8f9fa; padding:8px; border-radius:6px; border:1px solid #eee; min-height:30px;">Sistem Hazır</div>
+        <div class="haptic-actions">
+            <button id="haptic-conn-btn" class="haptic-btn btn-blue">
+                <span class="btn-icon">⚡</span> SİSTEMİ BAŞLAT
+            </button>
+            <button id="haptic-detect-btn" class="haptic-btn btn-cyan">
+                <span class="btn-icon">🔍</span> KUMAŞI HİSSET
+            </button>
+        </div>
+
+        <div id="haptic-status-bar">
+            <span id="haptic-status">SİSTEM HAZIR</span>
+        </div>
     `;
     
     document.body.appendChild(widget);
 
-    const slider = widget.querySelector('.haptic-slider');
-    const knob = document.createElement('div');
-    knob.setAttribute('style', `position: absolute; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%;`);
-    slider.appendChild(knob);
-
+    // Event Listener'ları tekrar bağlayalım
+    document.getElementById('haptic-conn-btn').onclick = connectToESP32;
+    document.getElementById('haptic-detect-btn').onclick = runAIAnalysis;
+    
     const muteCheckbox = document.getElementById('haptic-mute-switch');
-
-    // WIDGET AÇILINCA: Kayıtlı Mute durumunu yükle
+    
+    // Hafızadan durumu çek
     chrome.storage.local.get("haptic_mute_state", (data) => {
         if (data.haptic_mute_state !== undefined) {
             isMuted = data.haptic_mute_state;
             muteCheckbox.checked = isMuted;
-            // Görseli güncelle
-            knob.style.transform = isMuted ? "translateX(14px)" : "translateX(0)";
-            slider.style.backgroundColor = isMuted ? "#e91e63" : "#ccc";
         }
     });
 
-    document.getElementById('haptic-conn-btn').onclick = connectToESP32;
-    document.getElementById('haptic-detect-btn').onclick = runAIAnalysis;
-    
     muteCheckbox.onchange = (e) => {
-        knob.style.transform = e.target.checked ? "translateX(14px)" : "translateX(0)";
-        slider.style.backgroundColor = e.target.checked ? "#e91e63" : "#ccc";
         handleMuteToggle(e.target.checked);
     };
 
