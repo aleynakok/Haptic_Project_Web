@@ -82,6 +82,7 @@ async function connectToESP32() {
 }
 
 // MUTE DURUMUNU KAYDET VE GÖNDER
+// content.js içindeki ilgili fonksiyonu bununla değiştir
 async function handleMuteToggle(checked) {
     isMuted = checked;
     const status = document.getElementById('haptic-status');
@@ -92,7 +93,11 @@ async function handleMuteToggle(checked) {
     // 2. Cihaza Komut Gönder
     await sendMuteCommand(isMuted);
 
-    status.innerHTML = isMuted ? "<b style='color:#e91e63'>Sistem Susturuldu (0)</b>" : "<b style='color:green'>Sistem Aktif (u)</b>";
+    // RENK GÜNCELLEMESİ BURADA: 
+    // Susturulduğunda Switch pembe olduğu için pembe (#FF2E7E), aktifken Cyan (#00FBFF)
+    status.innerHTML = isMuted 
+        ? "<span style='color:#FF2E7E; text-shadow: 0 0 8px rgba(255,46,126,0.5)'>SİSTEM SUSTURULDU</span>" 
+        : "<span style='color:#00FBFF; text-shadow: 0 0 8px rgba(0,251,255,0.5)'>SİSTEM AKTİF</span>";
 }
 
 async function sendMuteCommand(mute) {
