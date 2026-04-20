@@ -1,90 +1,162 @@
+/* Google Fonts'tan fütüristik fontları çekiyoruz */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@500;700&display=swap');
+
 #haptic-widget {
     position: fixed;
     bottom: 30px;
     right: 30px;
-    z-index: 2147483647; /* En üstte görünmesi için */
-    background: #ffffff;
-    border: 1px solid #e0e0e0;
-    border-radius: 16px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    padding: 15px;
-    width: 200px;
-    font-family: 'Segoe UI', Tahoma, sans-serif;
+    z-index: 2147483647;
+    background: rgba(1, 4, 9, 0.85); /* Uygulamanın koyu rengi */
+    backdrop-filter: blur(15px); /* Cam efekti */
+    border: 1px solid rgba(0, 251, 255, 0.3); /* Cyan çerçeve */
+    border-radius: 20px;
+    box-shadow: 0 0 30px rgba(0, 123, 255, 0.2), inset 0 0 15px rgba(0, 251, 255, 0.1);
+    padding: 20px;
+    width: 240px;
+    font-family: 'Rajdhani', sans-serif;
+    color: #ffffff;
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 15px;
+    transition: all 0.3s ease;
+}
+
+/* Üst Başlık Kısmı */
+.haptic-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding-bottom: 10px;
 }
 
 .haptic-title {
-    font-weight: bold;
-    font-size: 14px;
-    color: #1a73e8;
-    text-align: center;
-    border-bottom: 1px solid #eee;
-    padding-bottom: 8px;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: #00FBFF;
+    text-shadow: 0 0 10px rgba(0, 251, 255, 0.5);
 }
 
+/* Durum Paneli */
+#haptic-status {
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Buton Tasarımları */
 .haptic-btn {
     width: 100%;
-    padding: 12px;
+    padding: 14px;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
-    font-weight: 600;
+    font-family: 'Orbitron', sans-serif;
+    font-weight: 700;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Bağlan Butonu - Mavi Gradyan */
+#haptic-conn-btn {
+    background: linear-gradient(135deg, #007BFF, #0056b3);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+/* Tespit Butonu - Cyan Gradyan */
+#haptic-detect-btn {
+    background: linear-gradient(135deg, #00FBFF, #009799);
+    color: #010409;
+    box-shadow: 0 4px 15px rgba(0, 251, 255, 0.3);
+}
+
+.haptic-btn:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.2);
+    box-shadow: 0 6px 20px rgba(0, 251, 255, 0.4);
+}
+
+.haptic-btn:active {
+    transform: translateY(1px);
+}
+
+/* Mute/Switch Bölümü */
+.haptic-control-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5px;
+}
+
+.haptic-label {
     font-size: 13px;
-    transition: all 0.2s;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.8);
+    letter-spacing: 1px;
 }
 
-#haptic-conn-btn { background: #1a73e8; color: white; }
-#haptic-detect-btn { background: #34a853; color: white; }
-.haptic-btn:hover { filter: brightness(1.1); }
-
-#haptic-status {
-    font-size: 12px;
-    color: #555;
-    text-align: center;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 6px;
-}
-
-/* Mute Switch Tasarımı */
+/* Özel Cyber Toggle Switch */
 .haptic-switch {
-  position: relative;
-  display: inline-block;
-  width: 34px;
-  height: 20px;
+    position: relative;
+    display: inline-block;
+    width: 44px;
+    height: 22px;
 }
 
-.haptic-switch input { 
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
+.haptic-switch input { opacity: 0; width: 0; height: 0; }
 
 .haptic-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-color: #ccc;
-  transition: .4s;
-  border-radius: 34px;
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: .4s;
+    border-radius: 34px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .haptic-slider:before {
-  position: absolute;
-  content: "";
-  height: 14px; width: 14px;
-  left: 3px; bottom: 3px;
-  background-color: white;
-  transition: .4s;
-  border-radius: 50%;
+    position: absolute;
+    content: "";
+    height: 14px; width: 14px;
+    left: 4px; bottom: 3px;
+    background-color: #ffffff;
+    transition: .4s;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 input:checked + .haptic-slider {
-  background-color: #e91e63; /* Mute aktifken pembe/kırmızı */
+    background-color: rgba(0, 251, 255, 0.2);
+    border-color: #00FBFF;
 }
 
 input:checked + .haptic-slider:before {
-  transform: translateX(14px);
+    transform: translateX(20px);
+    background-color: #00FBFF;
+    box-shadow: 0 0 15px #00FBFF;
+}
+
+/* Animasyon: Nabız Etkisi */
+@keyframes pulse-cyan {
+    0% { box-shadow: 0 0 0 0 rgba(0, 251, 255, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(0, 251, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 251, 255, 0); }
+}
+
+.status-online {
+    animation: pulse-cyan 2s infinite;
 }
