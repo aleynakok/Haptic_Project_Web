@@ -102,22 +102,23 @@
     box-shadow: 0 10px 25px rgba(0, 251, 255, 0.4) !important; 
 }
 
-/* style.css içindeki ilgili kısmı bununla güncelle */
+/* style.css içindeki bu kısmı güncelleyin */
 #haptic-status { 
-    font-size: 10px !important; /* 12px'den 10px'e düşürüldü */
-    letter-spacing: 2px !important; 
+    font-size: 13px !important; /* 10px'den 13px'e çıkarıldı */
+    line-height: 1.4 !important; /* Satır aralığı eklendi */
+    letter-spacing: 1.5px !important; 
     font-weight: 800 !important; 
     text-transform: uppercase !important;
-    opacity: 0.9;
+    display: block;
 }
 
 #haptic-status-bar { 
     text-align: center !important; 
     background: rgba(0,0,0,0.6) !important; 
-    padding: 12px !important; /* Biraz daha daraltıldı */
+    padding: 15px !important; /* İç boşluk biraz artırıldı */
     border-radius: 16px !important; 
     border: 1px solid rgba(0, 251, 255, 0.15) !important;
-    min-height: 40px !important; /* Yükseklik dengelendi */
+    min-height: 55px !important; /* İki satır için yükseklik artırıldı */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
