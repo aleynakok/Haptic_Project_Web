@@ -169,15 +169,15 @@ function initWidget() {
     if (document.getElementById('haptic-widget')) return;
     
     const widget = document.createElement('div');
-    widget.id = 'haptic-widget'; // Tüm tasarım artık style.css'den gelecek
+    widget.id = 'haptic-widget';
 
     widget.innerHTML = `
         <div class="haptic-header">
-            <div class="haptic-title-group">
+            <div>
                 <span class="haptic-glitch-text">HAPTIC AI</span>
-                <span class="haptic-sub-title">INTERFACE v2.0</span>
+                <span class="haptic-sub-title">CORE v2.0</span>
             </div>
-            <div class="haptic-status-dot pulse-cyan"></div>
+            <div class="haptic-status-dot"></div>
         </div>
 
         <div class="haptic-glass-card">
@@ -189,38 +189,32 @@ function initWidget() {
         </div>
 
         <div class="haptic-actions">
-            <button id="haptic-conn-btn" class="haptic-btn btn-blue">
-                <span class="btn-icon">⚡</span> SİSTEMİ BAŞLAT
-            </button>
-            <button id="haptic-detect-btn" class="haptic-btn btn-cyan">
-                <span class="btn-icon">🔍</span> KUMAŞI HİSSET
-            </button>
+            <button id="haptic-conn-btn" class="haptic-btn btn-blue">SİSTEMİ BAŞLAT</button>
+            <button id="haptic-detect-btn" class="haptic-btn btn-cyan">KUMAŞI HİSSET</button>
         </div>
 
         <div id="haptic-status-bar">
-            <span id="haptic-status">SİSTEM HAZIR</span>
+            <div id="haptic-status">SİSTEM HAZIR</div>
         </div>
     `;
     
     document.body.appendChild(widget);
 
-    // Event Listener'ları tekrar bağlayalım
     document.getElementById('haptic-conn-btn').onclick = connectToESP32;
     document.getElementById('haptic-detect-btn').onclick = runAIAnalysis;
     
     const muteCheckbox = document.getElementById('haptic-mute-switch');
     
-    // Hafızadan durumu çek
     chrome.storage.local.get("haptic_mute_state", (data) => {
         if (data.haptic_mute_state !== undefined) {
             isMuted = data.haptic_mute_state;
             muteCheckbox.checked = isMuted;
+            if (isMuted) handleMuteToggle(true);
         }
     });
 
-    muteCheckbox.onchange = (e) => {
-        handleMuteToggle(e.target.checked);
-    };
+    muteCheckbox.onchange = (e) => handleMuteToggle(e.target.checked);
+
 
     checkAutoConnect();
 }
