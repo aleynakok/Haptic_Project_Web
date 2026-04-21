@@ -113,24 +113,29 @@ async function sendMuteCommand(mute) {
     }
 }
 
+// content.js - Sadece görsel çıktıyı düzenleyen, AI mantığına dokunmayan sürüm
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
-    status.innerHTML = "Analiz ediliyor...";
-    const finalText = getProductMetadata();
+    status.innerHTML = "ANALİZ EDİLİYOR..."; // Kum saati kaldırıldı
+    
+    const productText = getProductMetadata();
 
     try {
         const response = await fetch(CLOUD_AI_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ text: finalText })
+            body: JSON.stringify({ text: productText })
         });
+        
         const data = await response.json();
+        
+        // AI MANTIĞI AYNI: Sadece ekran görüntüsündeki gibi KARAR ve GÜVEN'i alt alta yazdırıyoruz
         status.innerHTML = `
-            <div>KARAR: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
-            <div style="font-size: 11px; color: rgba(255,255,255,0.8); margin-top: 4px;">GÜVEN: %${(data.confidence * 100).toFixed(0)}</div>
+            <div style="margin-bottom: 2px;">KARAR: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 2px;">GÜVEN: ${data.confidence}</div>
         `;
         
-        // MUTE KONTROLÜ
+        // Donanım komutu gönderen kısım (Hiç dokunulmadı)
         if (!isMuted) {
             const activeChar = await getActiveCharacteristic();
             if (activeChar) {
@@ -139,7 +144,7 @@ async function runAIAnalysis() {
             }
         }
     } catch (err) {
-        status.innerHTML = "<b style='color:red'>Hata!</b>";
+        status.innerHTML = "<span style='color:#FF2E7E'>ANALİZ HATASI</span>";
     }
 }
 
