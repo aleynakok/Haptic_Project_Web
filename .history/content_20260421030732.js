@@ -1,3 +1,5 @@
+// content.js - Haptik AI Projesi (Mute Durumu Hafızalı Sürüm)
+
 const DEVICE_NAME = "Haptic_Fabric_ESP32";
 const SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
 const CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
@@ -7,6 +9,7 @@ let characteristic = null;
 let bluetoothDevice = null;
 let isMuted = false;
 
+// 1. Bluetooth Bağlantı Yönetimi
 async function getActiveCharacteristic() {
     if (characteristic && bluetoothDevice && bluetoothDevice.gatt.connected) {
         return characteristic;
@@ -14,6 +17,7 @@ async function getActiveCharacteristic() {
     return null;
 }
 
+// Otomatik Bağlantı Kontrolü
 async function checkAutoConnect() {
     const status = document.getElementById('haptic-status');
     try {
@@ -47,6 +51,7 @@ async function setupGATT(device) {
         connBtn.innerText = "Bağlı";
     }
 
+    // BAĞLANINCA: Eğer o an Mute açıksa "0" göndererek cihazı sustur
     if (isMuted) {
         sendMuteCommand(true);
     }
@@ -76,14 +81,20 @@ async function connectToESP32() {
     }
 }
 
+// MUTE DURUMUNU KAYDET VE GÖNDER
+// content.js içindeki ilgili fonksiyonu bununla değiştir
 async function handleMuteToggle(checked) {
     isMuted = checked;
     const status = document.getElementById('haptic-status');
 
+    // 1. Durumu Chrome Hafızasına Kaydet
     chrome.storage.local.set({ "haptic_mute_state": isMuted });
 
+    // 2. Cihaza Komut Gönder
     await sendMuteCommand(isMuted);
 
+    // RENK GÜNCELLEMESİ BURADA: 
+    // Susturulduğunda Switch pembe olduğu için pembe (#FF2E7E), aktifken Cyan (#00FBFF)
     status.innerHTML = isMuted 
         ? "<span style='color:#FF2E7E; text-shadow: 0 0 8px rgba(255,46,126,0.5)'>SİSTEM SUSTURULDU</span>" 
         : "<span style='color:#00FBFF; text-shadow: 0 0 8px rgba(0,251,255,0.5)'>SİSTEM AKTİF</span>";
@@ -102,9 +113,10 @@ async function sendMuteCommand(mute) {
     }
 }
 
+// content.js - Sadece görsel çıktıyı düzenleyen, AI mantığına dokunmayan sürüm
 async function runAIAnalysis() {
     const status = document.getElementById('haptic-status');
-    status.innerHTML = "ANALİZ EDİLİYOR..."; 
+    status.innerHTML = "ANALİZ EDİLİYOR..."; // Kum saati kaldırıldı
     
     const productText = getProductMetadata();
 
@@ -117,11 +129,13 @@ async function runAIAnalysis() {
         
         const data = await response.json();
         
+        // AI MANTIĞI AYNI: Sadece ekran görüntüsündeki gibi KARAR ve GÜVEN'i alt alta yazdırıyoruz
         status.innerHTML = `
             <div style="margin-bottom: 2px;">KARAR: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
             <div style="font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 2px;">GÜVEN: ${data.confidence}</div>
         `;
         
+        // Donanım komutu gönderen kısım (Hiç dokunulmadı)
         if (!isMuted) {
             const activeChar = await getActiveCharacteristic();
             if (activeChar) {
@@ -134,6 +148,7 @@ async function runAIAnalysis() {
     }
 }
 
+// Ürün Meta Verisi Çıkarıcı
 function getProductMetadata() {
     const titleSelectors = [".pr-new-br", ".product-name", "h1", "#productTitle", ".pro-title-container h1", "[data-testid='product-title']", ".product-title"];
     let title = "Bilinmeyen Ürün";

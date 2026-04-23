@@ -1,3 +1,4 @@
+/* style.css - Haptik AI Fabric Detector */
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@500;700;800&display=swap');
 
 #haptic-widget {
@@ -5,7 +6,7 @@
     bottom: 30px !important;
     right: 30px !important;
     z-index: 2147483647 !important;
-    width: 260px !important;
+    width: 260px !important; /* Hafif daraltıldı daha kompakt durması için */
     padding: 24px !important;
     background: rgba(1, 4, 9, 0.94) !important;
     backdrop-filter: blur(20px) saturate(180%) !important;
@@ -26,6 +27,7 @@
     align-items: center !important; 
 }
 
+/* HAPTIC AI */
 .haptic-glitch-text { 
     font-family: 'Orbitron', sans-serif !important; 
     font-size: 20px !important; 
@@ -35,6 +37,7 @@
     text-shadow: 0 0 15px rgba(0, 251, 255, 0.7) !important; 
 }
 
+/* INTERFACE yazısı kalktı, alt başlık CORE v2.0 */
 .haptic-sub-title { 
     font-size: 10px !important; 
     color: rgba(255, 255, 255, 0.4) !important; 
@@ -72,6 +75,7 @@
 
 .haptic-actions { display: flex; flex-direction: column; gap: 14px; }
 
+/* Simgesiz Butonlar */
 .haptic-btn { 
     border: none !important; 
     padding: 18px !important; 
@@ -98,9 +102,10 @@
     box-shadow: 0 10px 25px rgba(0, 251, 255, 0.4) !important; 
 }
 
+/* style.css içindeki bu kısmı güncelleyin */
 #haptic-status { 
-    font-size: 12px !important; 
-    line-height: 1.4 !important; 
+    font-size: 12px !important; /* 10px'den 13px'e çıkarıldı */
+    line-height: 1.4 !important; /* Satır aralığı eklendi */
     letter-spacing: 1.5px !important; 
     font-weight: 800 !important; 
     text-transform: uppercase !important;
@@ -110,15 +115,16 @@
 #haptic-status-bar { 
     text-align: center !important; 
     background: rgba(0,0,0,0.6) !important; 
-    padding: 15px !important;
+    padding: 15px !important; /* İç boşluk biraz artırıldı */
     border-radius: 16px !important; 
     border: 1px solid rgba(0, 251, 255, 0.15) !important;
-    min-height: 55px !important; 
+    min-height: 55px !important; /* İki satır için yükseklik artırıldı */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
 }
 
+/* Switch */
 .haptic-switch { position: relative; display: inline-block; width: 46px; height: 24px; }
 .haptic-switch input { opacity: 0; width: 0; height: 0; }
 .haptic-slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255, 255, 255, 0.12); border-radius: 30px; transition: 0.4s; }
