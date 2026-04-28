@@ -1,3 +1,3 @@
 chrome.runtime.onInstalled.addListener(() => {
-  console.log("Haptic AI Extension Ready.");
+  console.log("Haptik AI Uzantısı Hazır.");
 });
