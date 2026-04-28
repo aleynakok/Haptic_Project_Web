@@ -44,7 +44,7 @@ async function setupGATT(device) {
     status.innerHTML = "<b style='color:green'>SYSTEM CONNECTED</b>";
     if (connBtn) {
         connBtn.style.background = "#34a853";
-        connBtn.innerText = "CONNECTED";
+        connBtn.innerText = "Connected";
     }
 
     if (isMuted) {
@@ -118,8 +118,8 @@ async function runAIAnalysis() {
         const data = await response.json();
         
         status.innerHTML = `
-            <div style="margin-bottom: 2px;">DECISION: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
-            <div style="font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 2px;">CONFIDENCE: ${data.confidence}</div>
+            <div style="margin-bottom: 2px;">KARAR: <span style="color:#FF2E7E">${data.fabric.toUpperCase()}</span></div>
+            <div style="font-size: 11px; color: rgba(255,255,255,0.7); letter-spacing: 2px;">GÜVEN: ${data.confidence}</div>
         `;
         
         if (!isMuted) {
